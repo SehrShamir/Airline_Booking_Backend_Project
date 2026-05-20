@@ -2,7 +2,6 @@ const { StatusCodes } = require('http-status-codes');
 const AirplaneService = require('../sevices/airplane-service');
 
 const { SuccessResponse, ErrorResponse } = require('../utils/common');
-const { error } = require('winston');
 
 async function createAirplane(req, res) {
     try {
@@ -33,15 +32,42 @@ async function createAirplane(req, res) {
 async function getAirplanes(req, res) {
     try {
         const airplanes = await AirplaneService.getAirplanes();
-        SuccessResponse.data = airplanes;
-        return res.status(StatusCodes.OK).json(SuccessResponse);
+        return res.status(StatusCodes.OK).json({
+            ...SuccessResponse,
+            data: airplanes
+        });
     } catch (error) {
-        ErrorResponse.error = error;
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
-
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            ...ErrorResponse,
+            error
+        });
     }
 }
+async function getAirplane(req, res) {
+    try {
+        const airplane = await AirplaneService.getAirplane(req.params.id);
+        if (!airplane) {
+            return res.status(StatusCodes.NOT_FOUND).json({
+                success: false,
+                message: 'Airplane not found',
+                data: {},
+                error: { explanation: 'Airplane with the specified id was not found' }
+            });
+        }
+        return res.status(StatusCodes.OK).json({
+            ...SuccessResponse,
+            data: airplane
+        });
+    } catch (error) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            ...ErrorResponse,
+            error
+        });
+    }
+}
+
 module.exports = {
     createAirplane,
-    getAirplanes
+    getAirplanes,
+    getAirplane
 };

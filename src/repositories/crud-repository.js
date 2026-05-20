@@ -1,4 +1,6 @@
 const { Logger } = require('../config');
+const { StatusCodes } = require('http-status-codes');
+const AppError = require('../utils/errors/app-error');
 class CrudRepository {
     constructor(model) {
         this.model = model;
@@ -6,64 +8,51 @@ class CrudRepository {
     }
 
     async create(data) {
-        try {
-            const response = await this.model.create(data);
-            return response;
+
+        const response = await this.model.create(data);
+        return response;
 
 
-        }
-        catch (error) {
-            Logger.error("something went wrong in the Crud");
-            throw error;
-        }
+
+
     }
     async destroy(data) {
-        try {
-            const response = await this.model.destroy({
-                where: {
-                    id: data
-                }
-            });
-            return response;
-        }
-        catch (error) {
-            Logger.error("something went wrong in the Crud Repo : destroy");
-            throw error;
-        }
+
+        const response = await this.model.destroy({
+            where: {
+                id: data
+            }
+        });
+        return response;
+
+
     }
     async get(data) {
-        try {
-            const response = await this.model.findByPk(data);
-            return response;
+
+        const response = await this.model.findByPk(data);
+        if (!response) {
+            throw new AppError('Data not found for the specified id', StatusCodes.NOT_FOUND);
         }
-        catch (error) {
-            Logger.error("something went wrong in the Crud Repo : get");
-            throw error;
-        }
+        return response;
+
     }
     async getAll() {
-        try {
-            const response = await this.model.findAll();
-            return response;
-        }
-        catch (error) {
-            Logger.error("something went wrong in the Crud Repo : getAll");
-            throw error;
-        }
+
+        const response = await this.model.findAll();
+        return response;
+
+
     }
     async update(id, data) {
-        try {
-            const response = await this.model.update(data, {
-                where: {
-                    id: id
-                }
-            });
-            return response;
-        }
-        catch (error) {
-            Logger.error("something went wrong in the Crud Repo : update");
-            throw error;
-        }
+
+        const response = await this.model.update(data, {
+            where: {
+                id: id
+            }
+        });
+        return response;
+
+
     }
 }
 module.exports = CrudRepository;
